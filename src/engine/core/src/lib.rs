@@ -145,6 +145,15 @@ impl InputEngine {
             ret |= InputResult::CONSUMED;
         } else if key.code == KeyCode::Shift {
             // ignore shift key
+        } else if key
+            .state
+            .intersects(ModifierState::CONTROL | ModifierState::ALT | ModifierState::SUPER)
+            || matches!(
+                key.code,
+                KeyCode::ControlL | KeyCode::ControlR | KeyCode::AltL | KeyCode::AltR
+            )
+        {
+            // keep preedit for modifier assisted keys so shortcuts like Ctrl+C bypass cleanly
         } else {
             // clear preedit when get unhandled key
             self.clear_preedit();
