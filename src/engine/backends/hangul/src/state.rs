@@ -14,6 +14,11 @@ pub struct HangulEngine {
     word_buf: String,
 }
 
+const SPECIAL_CHARS: &[char] = &[
+    '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', ';',
+    ':', '\'', '"', ',', '<', '.', '>', '/', '?', '\\', '|', '`', '~',
+];
+
 impl HangulEngine {
     pub fn new(word_commit: bool, preedit_johab: PreeditJohabLevel) -> Self {
         Self {
@@ -73,9 +78,16 @@ impl HangulEngine {
     pub fn key(&mut self, kv: KeyValue, addons: EnumSet<Addon>, commit_buf: &mut String) -> bool {
         let ret = match kv {
             KeyValue::Pass(pass) => {
-                self.clear_preedit(commit_buf);
-                commit_buf.push(pass);
-                return true;
+                if SPECIAL_CHARS.contains(&pass) {
+                    if self.has_preedit() {
+                        self.clear_preedit(commit_buf);
+                    }
+                    return false;
+                } else {
+                    self.clear_preedit(commit_buf);
+                    commit_buf.push(pass);
+                    return true;
+                }
             }
             KeyValue::Choseong { cho } => self.state.cho(cho, addons),
             KeyValue::Jungseong { jung, compose } => self.state.jung(jung, compose, addons),
