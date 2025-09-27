@@ -94,12 +94,6 @@ impl InputEngine {
         self.try_get_global_input_category_state(config);
 
         let mut ret = InputResult::empty();
-        if matches!(
-            key.code,
-            KeyCode::ControlL | KeyCode::ControlR | KeyCode::AltL | KeyCode::AltR | KeyCode::Shift
-        ) {
-            return ret;
-        }
 
         if let Some(hotkey) = self.try_hotkey(key, config) {
             let mut processed = false;
@@ -151,6 +145,12 @@ impl InputEngine {
             ret |= InputResult::CONSUMED;
         } else if key.code == KeyCode::Shift {
             // ignore shift key
+        } else if matches!(
+            key.code,
+            KeyCode::ControlL | KeyCode::ControlR | KeyCode::AltL | KeyCode::AltR | KeyCode::Shift
+        ) {
+            ret |= self.current_result();
+            return ret;
         } else {
             // clear preedit when get unhandled key
             if self.engine_impl.has_preedit() {
